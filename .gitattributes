@@ -1,0 +1,6 @@
+*.rs text=auto
+*.toml text=auto
+*.md text=auto
+*.yml text=auto
+.gitattributes text=auto
+.gitignore text=auto
