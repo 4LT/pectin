@@ -345,9 +345,9 @@ dependencies = [
 
 [[package]]
 name = "quake-util"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f491a17c98cb0bd9679a0567310bfc8f56b0e3acf0559c0f81c91bc40450f9da"
+checksum = "f3776ea3cbcfa988676241b4e656e1f33f0b53eb9b7e9abb9f8f013dcbad668a"
 
 [[package]]
 name = "quote"

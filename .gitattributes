@@ -2,5 +2,6 @@
 *.toml text=auto
 *.md text=auto
 *.yml text=auto
+*.tcl text=auto
 .gitattributes text=auto
 .gitignore text=auto

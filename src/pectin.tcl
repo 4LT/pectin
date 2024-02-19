@@ -2,8 +2,13 @@ package require Tk 8.5
 package require platform
 
 set ::maps {}
+set ::paths {}
 set ::config {
     failureOnly 0
+}
+
+set ::MAP_TYPES {
+    {{Quake Map} {.bsp .BSP}}
 }
 
 proc closePectin {} {
@@ -57,7 +62,13 @@ proc populateMaps {treeView config mapList} {
     }
 }
 
-proc refresh {} {
+proc refreshConfig {} {
+    populateMaps .maps $::config $::maps
+}
+
+proc refreshPaths {} {
+    set ::maps [lmap path $::paths { build_report $path }]
+    sortReports ::maps
     populateMaps .maps $::config $::maps
 }
 
@@ -68,34 +79,93 @@ proc failureFilterUpdate {} {
         dict set ::config failureOnly 1
     }
 
-    refresh
+    refreshConfig
+}
+
+proc chooseFiles {} {
+    set paths [tk_getOpenFile -filetypes $::MAP_TYPES -multiple 1]
+    
+    if {[llength $paths] > 0} {
+        set ::paths $paths
+        refreshPaths
+    }
+}
+
+proc chooseDir {} {
+    set dir [tk_chooseDirectory -mustexist 1]
+
+    if {$dir != ""} {
+        set ::paths [glob -nocomplain -types {f l} -join $dir {*.[Bb][Ss][Pp]}]
+        refreshPaths
+    }
+}
+
+proc sortDict {d} {
+    set newDict {}
+    set keys [lsort -dictionary [dict keys $d]]
+
+    foreach key $keys {
+        dict append newDict $key [dict get $d $key]
+    }
+
+    return $newDict
+}
+
+proc sortMapReport {mapReport} {
+    if {[dict exists $mapReport report]} {
+        dict set mapReport report [sortDict [dict get $mapReport report]]
+    }
+
+    return $mapReport
+}
+
+proc sortReports {mapsVar} {
+    set $mapsVar [lmap report [subst $$mapsVar] { sortMapReport $report }]
+    set $mapsVar [lsort -command mapCmp [subst $$mapsVar]]
+}
+
+proc mapCmp {left right} {
+    return [string compare -nocase\
+        [dict get $left filename] [dict get $right filename]\
+    ]
 }
 
 option add *Menu.tearOff 0
 menu .m
-menu .m.file
-.m.file add command -label "Open Map(s)..."
-.m.file add command -label "Open Folder..."
+menu .m.file 
+.m.file add command -label "Open Map(s)..." -underline 0 -accelerator "Ctrl+O"\
+    -command chooseFiles
+.m.file add command -label "Open Folder..." -accelerator "Ctrl+L"\
+    -command chooseDir
 .m.file add separator
-.m.file add command -label "Exit" -command closePectin
-.m add cascade -label File -menu .m.file
+.m.file add command -label "Exit" -underline 1 -accelerator "Alt+F4"\
+    -command closePectin
+.m add cascade -label File -underline 0 -menu .m.file
 . configure -menu .m
 
-ttk::scrollbar .scroll -orient vertical
+bind all <Control-KeyPress-o> chooseFiles
+bind all <Control-KeyPress-l> chooseDir
+bind all <Alt-KeyPress-F4> {
+    closePectin
+    break
+}
 
-ttk::treeview .maps -columns {state failure} -yscrollcommand {.scroll set}
+ttk::scrollbar .scrolly -orient vertical
+
+ttk::treeview .maps -columns {state failure}\
+    -yscrollcommand {.scrolly set}
 .maps heading #0 -text Report
 .maps heading state -text State
 .maps heading failure -text "Failure details"
 .maps tag configure error -foreground red
 
-.scroll configure -command {.maps yview}
+.scrolly configure -command {.maps yview}
 
 ttk::checkbutton .filter -text "Show failures only" -padding {8 8 8 8}\
     -command failureFilterUpdate
 
 grid .filter -sticky ew -columnspan 2
-grid .maps .scroll -sticky nesw
+grid .maps .scrolly -sticky nesw
 grid columnconfigure . 0 -weight 1
 grid rowconfigure . 1 -weight 1
 
@@ -104,26 +174,3 @@ wm title . Pectin
 wm protocol . WM_DELETE_WINDOW {
     closePectin
 }
-
-set ::maps {
-    {
-        filename "map1.bsp"
-        error {{Parse} {Not a BSP}}
-    }
-    {
-        filename "map2.bsp"
-        report {
-            Lighting {pass Yes}
-            Track {pass 220}
-        }
-    }
-    {
-        filename "map3.bsp"
-        report {
-            Lighting {pass Yes}
-            Track {fail 1 "Data track"}
-        }
-    }
-}
-
-refresh
