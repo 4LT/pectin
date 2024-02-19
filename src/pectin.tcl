@@ -132,13 +132,23 @@ proc mapCmp {left right} {
 
 option add *Menu.tearOff 0
 menu .m
-menu .m.file
-.m.file add command -label "Open Map(s)..." -command chooseFiles
-.m.file add command -label "Open Folder..." -command chooseDir
+menu .m.file 
+.m.file add command -label "Open Map(s)..." -underline 0 -accelerator "Ctrl+O"\
+    -command chooseFiles
+.m.file add command -label "Open Folder..." -accelerator "Ctrl+L"\
+    -command chooseDir
 .m.file add separator
-.m.file add command -label "Exit" -command closePectin
-.m add cascade -label File -menu .m.file
+.m.file add command -label "Exit" -underline 1 -accelerator "Alt+F4"\
+    -command closePectin
+.m add cascade -label File -underline 0 -menu .m.file
 . configure -menu .m
+
+bind all <Control-KeyPress-o> chooseFiles
+bind all <Control-KeyPress-l> chooseDir
+bind all <Alt-KeyPress-F4> {
+    closePectin
+    break
+}
 
 ttk::scrollbar .scrolly -orient vertical
 
