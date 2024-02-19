@@ -7,5 +7,5 @@ license = "CC0-1.0 OR MIT OR Apache-2.0"
 description = "Checks Quake map jam submissions"
 
 [dependencies]
-quake-util = "^0.3.1"
+quake-util = "^0.3.2"
 tcl = "^0.1.9"
