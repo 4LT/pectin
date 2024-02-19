@@ -91,6 +91,15 @@ proc chooseFiles {} {
     }
 }
 
+proc chooseDir {} {
+    set dir [tk_chooseDirectory -mustexist 1]
+
+    if {$dir != ""} {
+        set ::paths [glob -nocomplain -types {f l} -join $dir {*.[Bb][Ss][Pp]}]
+        refreshPaths
+    }
+}
+
 proc sortDict {d} {
     set newDict {}
     set keys [lsort -dictionary [dict keys $d]]
@@ -125,7 +134,7 @@ option add *Menu.tearOff 0
 menu .m
 menu .m.file
 .m.file add command -label "Open Map(s)..." -command chooseFiles
-.m.file add command -label "Open Folder..."
+.m.file add command -label "Open Folder..." -command chooseDir
 .m.file add separator
 .m.file add command -label "Exit" -command closePectin
 .m add cascade -label File -menu .m.file
