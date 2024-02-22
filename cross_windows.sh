@@ -9,10 +9,12 @@ mkdir -p scratch/package/pectin/lib
 # -- Download & build Tcl --
 cd scratch
 
-curl --location -o tcl-${tcl_tag}.tar.gz\
-    https://github.com/tcltk/tcl/archive/refs/tags/${tcl_tag}.tar.gz
+if test \! -e tcl-${tcl_tag}.tar.gz; then
+    curl --location -o tcl-${tcl_tag}.tar.gz\
+        https://github.com/tcltk/tcl/archive/refs/tags/${tcl_tag}.tar.gz
+fi
 
-tar -xvf tcl-${tcl_tag}.tar.gz
+tar -xf tcl-${tcl_tag}.tar.gz
 cd tcl-${tcl_tag}/win
 mkdir -p build
 cd build
@@ -28,10 +30,13 @@ ln -sf tcl86.dll tcl8.6.dll
 # -- Download & build Tk --
 cd "$project_root"/scratch
 
-curl --location -o tk-${tcl_tag}.tar.gz\
-    https://github.com/tcltk/tk/archive/refs/tags/${tcl_tag}.tar.gz
+if test \! -e tk-${tcl_tag}.tar.gz; then
+    curl --location -o tk-${tcl_tag}.tar.gz\
+        https://github.com/tcltk/tk/archive/refs/tags/${tcl_tag}.tar.gz
 
-tar -xvf tk-${tcl_tag}.tar.gz
+fi
+
+tar -xf tk-${tcl_tag}.tar.gz
 cd tk-${tcl_tag}/win
 mkdir -p build
 cd build
