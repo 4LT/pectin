@@ -1,7 +1,9 @@
 #!/bin/sh
 
+script=`readlink -fn "$0"`
+project_root=`dirname "$script"`
 tcl_tag=core-8-6-13
-project_root="$PWD"
+cd "$project_root"
 
 mkdir -p scratch/package/pectin/bin
 mkdir -p scratch/package/pectin/lib
