@@ -9,6 +9,3 @@ description = "Checks Quake map jam submissions"
 [dependencies]
 quake-util = "^0.3.2"
 tcl = "^0.1.9"
-
-[build-dependencies]
-build-target = "^0.4.0"
