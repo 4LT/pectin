@@ -1,5 +1,5 @@
-package require Tk 8.5
-package require platform
+package require Tk 8.6
+#package require platform
 
 set ::maps {}
 set ::paths {}
