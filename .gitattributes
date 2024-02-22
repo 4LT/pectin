@@ -3,5 +3,6 @@
 *.md text=auto
 *.yml text=auto
 *.tcl text=auto
+*.sh text=auto
 .gitattributes text=auto
 .gitignore text=auto
