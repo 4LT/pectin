@@ -55,7 +55,7 @@ cd "$project_root"
 RUSTFLAGS="-L scratch/tcl-${tcl_tag}/win/build"\
     PKG_CONFIG_ALLOW_CROSS=1\
     BINDGEN_EXTRA_CLANG_ARGS='-D__int64="long long" -Dssize_t=int64_t'\
-    cargo build --target=x86_64-pc-windows-gnu --release
+    cargo build --target=x86_64-pc-windows-gnu --release || exit 1
 
 #  -- Build package --
 cd scratch/package/pectin
@@ -69,4 +69,4 @@ rm -rf lib/tk8.6
 cp -r "${project_root}/scratch/tk-${tcl_tag}/win/build/lib/tk8.6" lib/tk8.6
 cd "${project_root}/scratch/package"
 rm -f pectin.zip
-zip -r pectin.zip pectin
+zip -r pectin.zip pectin || exit 1
