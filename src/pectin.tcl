@@ -150,32 +150,36 @@ proc createAbout {} {
     ttk::frame .about.f -relief sunken
     variable textArea [text .about.f.text -tabs {1c 2c} -wrap word] 
 
-    variable titleSpace [scaleDim 24]
-    variable usedBySpace [scaleDim 12]
-    $textArea tag configure title -font $heading2 -spacing1 $titleSpace\
-        -spacing3 $titleSpace
-    $textArea tag configure usedBy -font $heading3 -spacing1 $usedBySpace\
-        -spacing3 $usedBySpace
-    $textArea tag configure usedByItem -font $heading3
-    $textArea tag configure href -foreground #1010ff -underline 1
+    if {[llength $::licenses] > 0} {
+        variable titleSpace [scaleDim 24]
+        variable usedBySpace [scaleDim 12]
+        $textArea tag configure title -font $heading2 -spacing1 $titleSpace\
+            -spacing3 $titleSpace
+        $textArea tag configure usedBy -font $heading3 -spacing1 $usedBySpace\
+            -spacing3 $usedBySpace
+        $textArea tag configure usedByItem -font $heading3
+        $textArea tag configure href -foreground #1010ff -underline 1
 
-    foreach license $::licenses {
-        variable name [dict get $license name]
-        variable text [dict get $license text]
-        variable usedBy [dict get $license usedBy]
+        foreach license $::licenses {
+            variable name [dict get $license name]
+            variable text [dict get $license text]
+            variable usedBy [dict get $license usedBy]
 
-        $textArea insert end "$name\n" title
-        $textArea insert end "$text\n"
-        $textArea insert end "Used by\n" usedBy
+            $textArea insert end "$name\n" title
+            $textArea insert end "$text\n"
+            $textArea insert end "Used by\n" usedBy
 
-        foreach pkg $usedBy {
-            variable crate [dict get $pkg crate]
-            variable v [dict get $pkg version]
-            variable href  [dict get $pkg href]
+            foreach pkg $usedBy {
+                variable crate [dict get $pkg crate]
+                variable v [dict get $pkg version]
+                variable href  [dict get $pkg href]
 
-            $textArea insert end "\t$crate $v\n" usedByItem
-            $textArea insert end "\t\t$href\n" href
+                $textArea insert end "\t$crate $v\n" usedByItem
+                $textArea insert end "\t\t$href\n" href
+            }
         }
+    } else {
+        $textArea insert end "No licenses found.\n"
     }
 
     $textArea configure -state disabled

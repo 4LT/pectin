@@ -1,6 +1,10 @@
 use std::fs;
 use std::process::Command;
 
+fn warn(mesg: impl std::fmt::Display) {
+    eprintln!("[WARN] {mesg}");
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=about.hbs");
 
@@ -11,18 +15,18 @@ fn main() {
         .output()
         .expect("Failed to run \"cargo about generate\"");
 
-    if !out.status.success() {
-        panic!("Process exited with non-zero status code");
-    }
+    let license_dict = if out.status.success() {
+        warn("\"cargo about\" failed (not installed?)");
+        String::from_utf8_lossy(&out.stdout)
+            .replace("&quot;", r#"\""#)
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&#x27;", "\x27")
+    } else {
+        String::from("")
+    };
 
-    let licenses_dict_text = String::from_utf8_lossy(&out.stdout);
-    let licenses_dict_text = licenses_dict_text.replace("&quot;", r#"\""#);
-    let licenses_dict_text = licenses_dict_text.replace("&lt;", "<");
-    let licenses_dict_text = licenses_dict_text.replace("&gt;", ">");
-    let licenses_dict_text = licenses_dict_text.replace("&#x27;", "\x27");
-
-    fs::write("src/licenses.tcldict", licenses_dict_text)
-        .expect("Failed to write to \"src/licenses.tcldict\"");
+    fs::write("src/licenses.tcldict", license_dict).unwrap();
 
     let version = env!("CARGO_PKG_VERSION");
 
@@ -33,5 +37,5 @@ fn main() {
 "#
         ),
     )
-    .expect("Failed to write to \"src/build.tcldict\"");
+    .unwrap();
 }
