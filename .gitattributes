@@ -4,5 +4,6 @@
 *.yml text=auto
 *.tcl text=auto
 *.sh text=auto
+*.hbs text=auto
 .gitattributes text=auto
 .gitignore text=auto
