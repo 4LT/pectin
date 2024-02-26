@@ -10,16 +10,24 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check:
+  install:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+      - name: Cargo Deny
+        run: cargo install cargo-deny
+      - name: Tcl/Tk
+        run: sudo apt-get install tcl-dev tk-dev
+
+  check:
+
+    needs: install
+
+    steps:
       - name: Deny
-        run: |
-          cargo install cargo-deny
-          cargo deny --log-level=error check
+        run: cargo deny --log-level=error check
       - name: Check
         run: cargo check -vv
       - name: Lint
@@ -27,9 +35,8 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    needs: install
 
     steps:
-      - uses: actions/checkout@v3
       - name: Build
         run: ./cross_windows.sh
