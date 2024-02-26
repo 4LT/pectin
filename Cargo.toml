@@ -11,4 +11,4 @@ quake-util = "^0.3.2"
 tcl = "^0.1.9"
 
 [build-dependencies]
-cargo-about = "^0.6.1"
+git2 = "^0.18.2"
