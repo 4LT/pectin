@@ -144,66 +144,89 @@ proc createAbout {} {
     variable heading2 [font create -size 18]
     variable heading3 [font create -size 14]
 
-    ttk::label .about.title -text "Licenses" -font $heading1 -anchor center
-    grid .about.title -sticky ew -pady 14 -columnspan 3
+    ttk::label .about.bTitle -text "Build Info" -font $heading1 -anchor center
+    grid .about.bTitle -sticky ew -pady 14 -columnspan 3
 
-    ttk::frame .about.f -relief sunken
-    variable textArea [text .about.f.text -tabs {1c 2c} -wrap word] 
+    ttk::frame .about.bFrame -relief sunken
+    variable bText [text .about.bFrame.text -wrap word -height 6]
+
+    $bText insert end "Pectin [dict get $::buildinfo version]\n"
+    $bText insert end [string cat "Commit " [dict get $::buildinfo commit]\
+        [if {[dict get $::buildinfo dirty]} {\
+            string cat " DIRTY"\
+        } {\
+            string cat\
+        }]\
+    "\n"]
+    $bText insert end "Branch [dict get $::buildinfo branch]\n"
+    $bText insert end [string cat "Target " [dict get $::buildinfo target]\
+        " (" [dict get $::buildinfo profile] ")\n"\
+    ]
+    $bText insert end "Repository [dict get $::buildinfo repo]\n"
+
+    $bText configure -state disabled
+    grid $bText -sticky nesw
+    grid columnconfigure .about.bFrame 0 -weight 1
+    grid rowconfigure .about.bFrame 0 -weight 1
+    grid .about.bFrame -sticky nesw -columnspan 3
+
+    ttk::label .about.lTitle -text "Licenses" -font $heading1 -anchor center
+    grid .about.lTitle -sticky ew -pady 14 -columnspan 3
+
+    ttk::frame .about.lFrame -relief sunken
+    variable lText [text .about.lFrame.text -tabs {1c 2c} -wrap word] 
 
     if {[llength $::licenses] > 0} {
         variable titleSpace [scaleDim 24]
         variable usedBySpace [scaleDim 12]
-        $textArea tag configure title -font $heading2 -spacing1 $titleSpace\
+        $lText tag configure title -font $heading2 -spacing1 $titleSpace\
             -spacing3 $titleSpace
-        $textArea tag configure usedBy -font $heading3 -spacing1 $usedBySpace\
+        $lText tag configure usedBy -font $heading3 -spacing1 $usedBySpace\
             -spacing3 $usedBySpace
-        $textArea tag configure usedByItem -font $heading3
-        $textArea tag configure href -foreground #1010ff -underline 1
+        $lText tag configure usedByItem -font $heading3
+        # $lText tag configure href -foreground #1010ff -underline 1
 
         foreach license $::licenses {
             variable name [dict get $license name]
             variable text [dict get $license text]
             variable usedBy [dict get $license usedBy]
 
-            $textArea insert end "$name\n" title
-            $textArea insert end "$text\n"
-            $textArea insert end "Used by\n" usedBy
+            $lText insert end "$name\n" title
+            $lText insert end "$text\n"
+            $lText insert end "Used by\n" usedBy
 
             foreach pkg $usedBy {
                 variable crate [dict get $pkg crate]
                 variable v [dict get $pkg version]
                 variable href  [dict get $pkg href]
 
-                $textArea insert end "\t$crate $v\n" usedByItem
-                $textArea insert end "\t\t$href\n" href
+                $lText insert end "\t$crate $v\n" usedByItem
+                $lText insert end "\t\t$href\n" href
             }
         }
     } else {
-        $textArea insert end "No licenses found.\n"
+        $lText insert end "No licenses found.\n"
     }
 
-    $textArea configure -state disabled
-
-    grid $textArea -sticky nesw
-    grid columnconfigure .about.f 0 -weight 1
-    grid rowconfigure .about.f 0 -weight 1
-    grid .about.f -sticky nesw -columnspan 2
+    $lText configure -state disabled
+    grid $lText -sticky nesw
+    grid columnconfigure .about.lFrame 0 -weight 1
+    grid rowconfigure .about.lFrame 0 -weight 1
+    grid .about.lFrame -sticky nesw -columnspan 2
 
     ttk::scrollbar .about.scroll -orient vertical\
-        -command [list $textArea yview]
-    grid .about.scroll -sticky nesw -row 1 -column 2
-    $textArea configure -yscrollcommand {.about.scroll set}
+        -command [list $lText yview]
+    grid .about.scroll -sticky nesw -row 3 -column 2
+    $lText configure -yscrollcommand {.about.scroll set}
 
     ttk::button .about.ok -text "Ok" -command closeAbout
     grid .about.ok -column 1 -columnspan 2 -pady 10
 
     grid columnconfigure .about 0 -weight 1
-    grid rowconfigure .about 1 -weight 1
+    grid rowconfigure .about 3 -weight 1
     configureBackground .about
     
     closeAbout
-
-    return [list .about $textArea]
 }
 
 proc closeAbout {} {
@@ -213,7 +236,7 @@ proc closeAbout {} {
 proc openAbout {} {
     wm manage .about
     wm protocol .about WM_DELETE_WINDOW closeAbout
-    wm minsize .about [scaleDim 820] [scaleDim 800]
+    wm minsize .about [scaleDim 800] [scaleDim 960]
 }
 
 option add *Menu.tearOff 0

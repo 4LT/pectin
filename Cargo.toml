@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["Seth Rader"]
 license = "CC0-1.0 OR MIT OR Apache-2.0"
 description = "Checks Quake map jam submissions"
+repository = "https://github.com/4LT/pectin"
 
 [dependencies]
 quake-util = "^0.3.2"

@@ -58,13 +58,13 @@ fn main() {
                 ),
                 Ok(None) => {
                     warn("No ref HEAD");
-                    warn("Setting \"commit\" to \"Unknown\"");
-                    (None, "Unknown".to_string())
+                    warn("Setting \"commit\" to \"\"");
+                    (None, "".to_string())
                 }
                 Err(err) => {
                     warn(format!("Failed to get ref HEAD: {err}"));
-                    warn("Setting \"commit\" to \"Unknown\"");
-                    (None, "Unknown".to_string())
+                    warn("Setting \"commit\" to \"\"");
+                    (None, "".to_string())
                 }
             };
 
@@ -85,7 +85,7 @@ fn main() {
                 })
                 .map_err(|e| {
                     warn("Can't get branches");
-                    warn("Setting \"branch\" to \"Unknown\"");
+                    warn("Setting \"branch\" to \"\"");
                     e
                 })
                 .unwrap_or(None);
@@ -100,7 +100,7 @@ fn main() {
                         })
                         .map(String::from)
                 })
-                .unwrap_or("Unknown".to_string());
+                .unwrap_or("".to_string());
 
             let d = repo.state() != git2::RepositoryState::Clean;
 
@@ -131,8 +131,8 @@ fn main() {
         }
         Err(err) => {
             warn(format!("Failed to open current repository: {err}"));
-            warn("Setting \"branch\" and \"commit\" to \"Unknown\"");
-            ("Unknown".to_string(), "Unknown".to_string(), true)
+            warn("Setting \"branch\" and \"commit\" to \"\"");
+            ("".to_string(), "".to_string(), true)
         }
     };
 
@@ -143,12 +143,12 @@ fn main() {
     fs::write(
         "src/build.tcldict",
         format!(
-            r#"version {version}
-            repo {repo_name}
-            target {target}
-            profile {profile}
-            commit {commit}
-            branch {branch}
+            r#"version "{version}"
+            repo "{repo_name}"
+            target "{target}"
+            profile "{profile}"
+            commit "{commit}"
+            branch "{branch}"
             dirty {}
 "#,
             if dirty { 1 } else { 0 }
