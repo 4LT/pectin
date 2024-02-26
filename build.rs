@@ -103,17 +103,6 @@ fn main() {
                 .unwrap_or("Unknown".to_string());
 
             let d = repo.state() != git2::RepositoryState::Clean;
-            let idx_res = repo.index();
-
-            let d = d
-                || match idx_res {
-                    Ok(idx) => !idx.is_empty(),
-                    Err(err) => {
-                        warn(format!("Can't get index: {err}"));
-                        warn("Assuming dirty");
-                        true
-                    }
-                };
 
             let d = d
                 || repo
@@ -121,7 +110,16 @@ fn main() {
                         tree.as_ref(),
                         Some(git2::DiffOptions::new().include_untracked(true)),
                     )
-                    .map(|diff| diff.deltas().len() > 0)
+                    .map(|diff| {
+                        if diff.deltas().len() > 0 {
+                            warn(
+                                "Diff between HEAD and working directory found",
+                            );
+                            true
+                        } else {
+                            false
+                        }
+                    })
                     .map_err(|e| {
                         warn("Failed to diff working dir against HEAD");
                         warn("Assuming dirty");
