@@ -3,13 +3,13 @@ use std::env;
 use std::fs;
 use std::process::Command;
 
-git_testament!(TESTAMENT);
-
 fn warn(mesg: impl std::fmt::Display) {
     println!("cargo:warning={mesg}");
 }
 
 fn main() {
+    git_testament!(TESTAMENT);
+
     println!("cargo:rerun-if-changed=about.hbs");
     println!("cargo:rerun-if-changed=.git");
 
