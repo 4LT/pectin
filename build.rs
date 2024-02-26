@@ -45,7 +45,19 @@ fn main() {
     };
 
     let branch = TESTAMENT.branch_name.unwrap_or("");
-    let dirty = TESTAMENT.modifications.len() > 0;
+    let dirty = !TESTAMENT.modifications.is_empty();
+
+    if commit == "" {
+        warn("Unknown commit");
+    }
+
+    if branch == "" {
+        warn("Unknown branch");
+    }
+
+    if dirty {
+        warn("Working directory is dirty");
+    }
 
     fs::write(
         "src/build.tcldict",
