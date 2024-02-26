@@ -17,16 +17,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Cargo Deny
+      - name: Install Cargo Deny
         run: cargo install cargo-deny
-      - name: Tcl/Tk
+      - name: Install Tcl/Tk
         run: sudo apt-get install tcl-dev tk-dev
       - name: Deny
         run: cargo deny --log-level=error check
       - name: Check
-        run: cargo check -vv
+        run: cargo check --verbose
       - name: Lint
-        run: cargo clippy -Dwarnings
+        run: cargo clippy -- -Dwarnings
 
   build:
 
@@ -34,7 +34,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Tcl/Tk
+      - name: Install Windows Toolchain
+        run: rustup target add x86_64-pc-windows-gnu
+      - name: Install Cargo About
+        run: cargo install cargo-about
+      - name: Install Tcl/Tk
         run: sudo apt-get install tcl-dev tk-dev
       - name: Build
         run: ./cross_windows.sh
