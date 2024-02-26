@@ -1,6 +1,9 @@
+use git_testament::{git_testament, CommitKind};
 use std::env;
 use std::fs;
 use std::process::Command;
+
+git_testament!(TESTAMENT);
 
 fn warn(mesg: impl std::fmt::Display) {
     println!("cargo:warning={mesg}");
@@ -35,110 +38,14 @@ fn main() {
     let target = env::var("TARGET").unwrap();
     let profile = env::var("PROFILE").unwrap();
 
-    let repo_res = git2::Repository::open(".");
-    let (commit, branch, dirty) = match repo_res {
-        Ok(repo) => {
-            let reference = repo.head();
-            let oid_res = reference.map(|r| r.target());
-
-            let (tree, c) = match oid_res {
-                Ok(Some(oid)) => (
-                    repo.find_commit(oid)
-                        .map_err(|e| {
-                            warn("Can't get commit for HEAD");
-                            e
-                        })
-                        .and_then(|commit| commit.tree())
-                        .map_err(|e| {
-                            warn("Can't find tree assoc. with HEAD");
-                            e
-                        })
-                        .ok(),
-                    oid.to_string(),
-                ),
-                Ok(None) => {
-                    warn("No ref HEAD");
-                    warn("Setting \"commit\" to \"\"");
-                    (None, "".to_string())
-                }
-                Err(err) => {
-                    warn(format!("Failed to get ref HEAD: {err}"));
-                    warn("Setting \"commit\" to \"\"");
-                    (None, "".to_string())
-                }
-            };
-
-            let branch_obj: Option<git2::Branch> = repo
-                .branches(Some(git2::BranchType::Local))
-                .map(|mut branches| {
-                    branches.find_map(|branch_res| {
-                        if let Ok((branch, _)) = branch_res {
-                            if branch.is_head() {
-                                Some(branch)
-                            } else {
-                                None
-                            }
-                        } else {
-                            None
-                        }
-                    })
-                })
-                .map_err(|e| {
-                    warn("Can't get branches");
-                    warn("Setting \"branch\" to \"\"");
-                    e
-                })
-                .unwrap_or(None);
-
-            let b: String = branch_obj
-                .and_then(|branch| {
-                    branch
-                        .name()
-                        .unwrap_or_else(|e| {
-                            warn(format!("Can't get branch name: {e}"));
-                            None
-                        })
-                        .map(String::from)
-                })
-                .unwrap_or("".to_string());
-
-            let d = repo.state() != git2::RepositoryState::Clean;
-
-            let d = d
-                || repo
-                    .diff_tree_to_workdir_with_index(
-                        tree.as_ref(),
-                        Some(git2::DiffOptions::new().include_untracked(true)),
-                    )
-                    .map(|diff| {
-                        if diff.deltas().len() > 0 {
-                            warn(
-                                "Diff between HEAD and working directory found",
-                            );
-                            true
-                        } else {
-                            false
-                        }
-                    })
-                    .map_err(|e| {
-                        warn("Failed to diff working dir against HEAD");
-                        warn("Assuming dirty");
-                        e
-                    })
-                    .unwrap_or(true);
-
-            (c, b, d)
-        }
-        Err(err) => {
-            warn(format!("Failed to open current repository: {err}"));
-            warn("Setting \"branch\" and \"commit\" to \"\"");
-            ("".to_string(), "".to_string(), true)
-        }
+    let commit = match TESTAMENT.commit {
+        CommitKind::NoTags(hash, _) => hash,
+        CommitKind::FromTag(_, hash, _, _) => hash,
+        _ => "",
     };
 
-    if dirty {
-        warn("Working directory is dirty, or failed to get repo stats");
-    }
+    let branch = TESTAMENT.branch_name.unwrap_or("");
+    let dirty = TESTAMENT.modifications.len() > 0;
 
     fs::write(
         "src/build.tcldict",

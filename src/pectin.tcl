@@ -235,6 +235,7 @@ proc closeAbout {} {
 
 proc openAbout {} {
     wm manage .about
+    wm title .about "Pectin - About"
     wm protocol .about WM_DELETE_WINDOW closeAbout
     wm minsize .about [scaleDim 800] [scaleDim 960]
 }

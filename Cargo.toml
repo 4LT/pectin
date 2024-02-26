@@ -12,4 +12,4 @@ quake-util = "^0.3.2"
 tcl = "^0.1.9"
 
 [build-dependencies]
-git2 = "^0.18.2"
+git-testament = "^0.2.5"
