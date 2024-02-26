@@ -11,6 +11,7 @@ fn warn(mesg: impl std::fmt::Display) {
 
 fn main() {
     println!("cargo:rerun-if-changed=about.hbs");
+    println!("cargo:rerun-if-changed=.git");
 
     let out = Command::new("cargo")
         .arg("about")
