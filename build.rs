@@ -57,7 +57,7 @@ fn main() {
                     oid.to_string(),
                 ),
                 Ok(None) => {
-                    warn(format!("No ref HEAD"));
+                    warn("No ref HEAD");
                     warn("Setting \"commit\" to \"Unknown\"");
                     (None, "Unknown".to_string())
                 }
