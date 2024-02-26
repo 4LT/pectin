@@ -134,7 +134,7 @@ proc mapCmp {left right} {
 }
 
 proc scaleDim {dim} {
-    return [expr int(floor($dim / [tk scaling]))]
+    return [expr int(floor($dim * [tk scaling]))]
 }
 
 proc createAbout {} {
@@ -170,6 +170,12 @@ proc createAbout {} {
     grid rowconfigure .about.bFrame 0 -weight 1
     grid .about.bFrame -sticky nesw -columnspan 3
 
+    ttk::button .about.copy -text "Copy to clipboard" -command {
+        $bText tag add sel 1.0 end
+        tk_textCopy $bText
+    }
+    grid .about.copy -column 1 -columnspan 2 -pady 10 -sticky e
+
     ttk::label .about.lTitle -text "Licenses" -font $heading1 -anchor center
     grid .about.lTitle -sticky ew -pady 14 -columnspan 3
 
@@ -179,11 +185,13 @@ proc createAbout {} {
     if {[llength $::licenses] > 0} {
         variable titleSpace [scaleDim 24]
         variable usedBySpace [scaleDim 12]
+        variable usedByItemSpace [scaleDim 6]
         $lText tag configure title -font $heading2 -spacing1 $titleSpace\
             -spacing3 $titleSpace
         $lText tag configure usedBy -font $heading3 -spacing1 $usedBySpace\
             -spacing3 $usedBySpace
-        $lText tag configure usedByItem -font $heading3
+        $lText tag configure usedByItem -font $heading3\
+            -spacing1 $usedByItemSpace -spacing3 $usedByItemSpace
         # $lText tag configure href -foreground #1010ff -underline 1
 
         foreach license $::licenses {
@@ -216,14 +224,14 @@ proc createAbout {} {
 
     ttk::scrollbar .about.scroll -orient vertical\
         -command [list $lText yview]
-    grid .about.scroll -sticky nesw -row 3 -column 2
+    grid .about.scroll -sticky nesw -row 4 -column 2
     $lText configure -yscrollcommand {.about.scroll set}
 
     ttk::button .about.ok -text "Ok" -command closeAbout
-    grid .about.ok -column 1 -columnspan 2 -pady 10
+    grid .about.ok -column 1 -columnspan 2 -pady 10 -sticky e
 
     grid columnconfigure .about 0 -weight 1
-    grid rowconfigure .about 3 -weight 1
+    grid rowconfigure .about 4 -weight 1
     configureBackground .about
     
     closeAbout
@@ -237,7 +245,7 @@ proc openAbout {} {
     wm manage .about
     wm title .about "Pectin - About"
     wm protocol .about WM_DELETE_WINDOW closeAbout
-    wm minsize .about [scaleDim 800] [scaleDim 960]
+    wm minsize .about [scaleDim 500] [scaleDim 600]
 }
 
 option add *Menu.tearOff 0
