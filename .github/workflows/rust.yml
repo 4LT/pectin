@@ -17,9 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Deny
-        run:
-          - cargo install cargo-deny
-          - cargo deny --log-level=error check
+        run: |
+          cargo install cargo-deny
+          cargo deny --log-level=error check
       - name: Check
         run: cargo check -vv
       - name: Lint
