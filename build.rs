@@ -47,11 +47,11 @@ fn main() {
     let branch = TESTAMENT.branch_name.unwrap_or("");
     let dirty = !TESTAMENT.modifications.is_empty();
 
-    if commit == "" {
+    if commit.is_empty() {
         warn("Unknown commit");
     }
 
-    if branch == "" {
+    if branch.is_empty() {
         warn("Unknown branch");
     }
 
