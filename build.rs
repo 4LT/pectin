@@ -9,9 +9,8 @@ fn warn(mesg: impl std::fmt::Display) {
 
 fn main() {
     println!("cargo:rerun-if-changed=.git");
-    println!("cargo:rerun-if-changed=about.hbs");
-
     git_testament!(TESTAMENT);
+    println!("cargo:rerun-if-changed=about.hbs");
 
     let out = Command::new("cargo")
         .arg("about")
