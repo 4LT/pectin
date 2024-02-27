@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Cargo Deny
         run: cargo install cargo-deny
       - name: Install Tcl/Tk
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Windows Toolchain
         run: rustup target add x86_64-pc-windows-gnu
       - name: Install Cargo About
@@ -54,4 +54,23 @@ jobs:
             }}-${{
               github.sha
             }}
-          path: scratch/package/pectin/
+          path: scratch/package/pectin.zip
+          compression-level: 0
+          retention-days: 5
+
+  release:
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: [ check, build ]
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pectin-win64-${{github.ref_name}}-${{github.sha}}
+      - name: Extract
+        run: unzip pectin.zip
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'pectin/'
+          body: "# Pectin ${{ github.ref_name }}"
