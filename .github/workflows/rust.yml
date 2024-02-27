@@ -54,4 +54,6 @@ jobs:
             }}-${{
               github.sha
             }}
-          path: scratch/package/pectin/
+          path: |
+            scratch/package/
+            '!**/pectin.zip'
