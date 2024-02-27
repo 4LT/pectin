@@ -5,6 +5,8 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  release:
+    types: [ "published" ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -57,3 +59,19 @@ jobs:
           path: |
             scratch/package/
             '!**/pectin.zip'
+          retention-days: 5
+
+  release:
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: [ check, build ]
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pectin-win64-${{github.ref_name}}-${{github.sha}}
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'pectin/'
+          body: "# Pectin ${{ github.ref_name }}"
