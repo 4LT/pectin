@@ -48,7 +48,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install-libraries TCL_EXE=tclsh
+make install TCL_EXE=tclsh
 
 # -- Build exe --
 cd "$project_root"
