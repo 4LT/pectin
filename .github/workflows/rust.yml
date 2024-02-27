@@ -44,3 +44,14 @@ jobs:
         run: sudo apt-get install tcl-dev
       - name: Build Windows Exe
         run: WARN_FATAL=1 ./cross_windows.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: >-
+            pectin-win64-${{
+              github.event_name == 'push' &&
+                github.ref_name ||
+                format('pr{0}', github.event.number)
+            }}-${{
+              github.sha
+            }}
+          path: scratch/package/pectin/

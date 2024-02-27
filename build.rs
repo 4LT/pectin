@@ -43,11 +43,11 @@ fn main() {
     };
 
     fs::write("src/licenses.tcldict", license_dict).unwrap();
-
     let version = env!("CARGO_PKG_VERSION");
     let repo_name = env!("CARGO_PKG_REPOSITORY");
     let target = env::var("TARGET").unwrap();
     let profile = env::var("PROFILE").unwrap();
+
     let commit = match TESTAMENT.commit {
         CommitKind::NoTags(hash, _) => hash,
         CommitKind::FromTag(_, hash, _, _) => hash,
