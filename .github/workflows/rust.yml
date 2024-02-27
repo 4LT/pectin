@@ -70,9 +70,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: pectin-win64-${{github.ref_name}}-${{github.sha}}
-      - name: Extract
-        run: unzip pectin.zip
+      - name: Rename
+        run: mv pectin.zip pectin-${{github.ref_name}}-win-x86_64.zip
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: 'pectin/'
+          artifacts: "pectin-${{github.ref_name}}-win-x86_64.zip"
           body: "# Pectin ${{ github.ref_name }}"
