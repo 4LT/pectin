@@ -26,7 +26,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install TCL_EXE=tclsh
+make install-libraries TCL_EXE=tclsh
 ln -sf tcl86.dll tcl8.6.dll
 
 # -- Download & build Tk --
@@ -48,7 +48,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install TCL_EXE=tclsh
+make install-libraries TCL_EXE=tclsh
 
 # -- Build exe --
 cd "$project_root"
