@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Cargo Deny
         run: cargo install cargo-deny
       - name: Install Tcl/Tk
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Windows Toolchain
         run: rustup target add x86_64-pc-windows-gnu
       - name: Install Cargo About
