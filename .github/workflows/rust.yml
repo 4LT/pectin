@@ -10,20 +10,23 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+
   check:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install Cargo Deny
+        run: cargo install cargo-deny
+      - name: Install Tcl/Tk
+        run: sudo apt-get install tcl-dev tk-dev
       - name: Deny
-        run:
-          - cargo install cargo-deny
-          - cargo deny --log-level=error check
+        run: cargo deny --log-level=error check
       - name: Check
-        run: cargo check -vv
+        run: cargo check --verbose
       - name: Lint
-        run: cargo clippy -Dwarnings
+        run: cargo clippy -- -Dwarnings
 
   build:
 
@@ -31,5 +34,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Build
-        run: ./cross_windows.sh
+      - name: Install Windows Toolchain
+        run: rustup target add x86_64-pc-windows-gnu
+      - name: Install Cargo About
+        run: cargo install cargo-about
+      - name: Install MinGW
+        run: sudo apt-get install gcc-mingw-w64-x86-64
+      - name: Install Tcl
+        run: sudo apt-get install tcl-dev
+      - name: Build Windows Exe
+        run: WARN_FATAL=1 ./cross_windows.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: >-
+            pectin-win64-${{
+              github.event_name == 'push' &&
+                github.ref_name ||
+                format('pr{0}', github.event.number)
+            }}-${{
+              github.sha
+            }}
+          path: scratch/package/pectin/
