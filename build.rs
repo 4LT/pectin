@@ -3,14 +3,19 @@ use std::env;
 use std::fs;
 use std::process::Command;
 
-fn warn(mesg: impl std::fmt::Display) {
-    println!("cargo:warning={mesg}");
+fn warn(fatal: bool, mesg: impl std::fmt::Display) {
+    if fatal {
+        panic!("{mesg}");
+    } else {
+        println!("cargo:warning={mesg}");
+    }
 }
 
 fn main() {
     println!("cargo:rerun-if-changed=.git");
     git_testament!(TESTAMENT);
     println!("cargo:rerun-if-changed=about.hbs");
+    println!("cargo:rerun-if-env-changed=WARN_FATAL");
 
     let out = Command::new("cargo")
         .arg("about")
@@ -19,6 +24,12 @@ fn main() {
         .output()
         .expect("Failed to run \"cargo about generate\"");
 
+    let warn_is_fatal = env::var("WARN_FATAL")
+        .map_err(|_| ())
+        .and_then(|x| x.parse::<i32>().map_err(|_| ()))
+        .unwrap_or(0)
+        != 0;
+
     let license_dict = if out.status.success() {
         String::from_utf8_lossy(&out.stdout)
             .replace("&quot;", r#"\""#)
@@ -26,8 +37,8 @@ fn main() {
             .replace("&gt;", ">")
             .replace("&#x27;", "\x27")
     } else {
-        warn("\"cargo about\" failed (not installed?)");
-        warn("Skipping compilation of licenses");
+        warn(warn_is_fatal, "\"cargo about\" failed (not installed?)");
+        warn(false, "Skipping compilation of licenses");
         String::from("")
     };
 
@@ -37,7 +48,6 @@ fn main() {
     let repo_name = env!("CARGO_PKG_REPOSITORY");
     let target = env::var("TARGET").unwrap();
     let profile = env::var("PROFILE").unwrap();
-
     let commit = match TESTAMENT.commit {
         CommitKind::NoTags(hash, _) => hash,
         CommitKind::FromTag(_, hash, _, _) => hash,
@@ -48,15 +58,15 @@ fn main() {
     let dirty = !TESTAMENT.modifications.is_empty();
 
     if commit.is_empty() {
-        warn("Unknown commit");
+        warn(warn_is_fatal, "Unknown commit");
     }
 
     if branch.is_empty() {
-        warn("Unknown branch");
+        warn(warn_is_fatal, "Unknown branch");
     }
 
     if dirty {
-        warn("Working directory is dirty");
+        warn(warn_is_fatal, "Working directory is dirty");
     }
 
     fs::write(

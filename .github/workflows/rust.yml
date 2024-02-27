@@ -40,7 +40,7 @@ jobs:
         run: cargo install cargo-about
       - name: Install MinGW
         run: sudo apt-get install gcc-mingw-w64-x86-64
-      - name: Install Tcl/Tk
-        run: sudo apt-get install tcl-dev tk-dev
-      - name: Build
-        run: ./cross_windows.sh
+      - name: Install Tcl
+        run: sudo apt-get install tcl-dev
+      - name: Build Windows Exe
+        run: WARN_FATAL=1 ./cross_windows.sh
