@@ -42,7 +42,7 @@ jobs:
         run: cargo install cargo-about
       - name: Install MinGW
         run: sudo apt-get install gcc-mingw-w64-x86-64
-      - name: Install Tcl
+      - name: Install Tcl Headers
         run: sudo apt-get install tcl-dev
       - name: Build Windows Exe
         run: WARN_FATAL=1 ./cross_windows.sh
@@ -70,9 +70,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: pectin-win64-${{github.ref_name}}-${{github.sha}}
-      - name: Extract
-        run: unzip pectin.zip
+      - name: Rename
+        run: mv pectin.zip pectin-${{github.ref_name}}-win-x86_64.zip
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: 'pectin/'
+          artifacts: "pectin-${{github.ref_name}}-win-x86_64.zip"
           body: "# Pectin ${{ github.ref_name }}"

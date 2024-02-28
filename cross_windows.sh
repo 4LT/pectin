@@ -26,7 +26,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install
+make install-libraries TCL_EXE=tclsh
 ln -sf tcl86.dll tcl8.6.dll
 
 # -- Download & build Tk --
@@ -35,7 +35,6 @@ cd "$project_root"/scratch
 if test \! -e tk-${tcl_tag}.tar.gz; then
     curl --location -o tk-${tcl_tag}.tar.gz\
         https://github.com/tcltk/tk/archive/refs/tags/${tcl_tag}.tar.gz
-
 fi
 
 tar -xf tk-${tcl_tag}.tar.gz
@@ -49,7 +48,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install
+make install TCL_EXE=tclsh
 
 # -- Build exe --
 cd "$project_root"
