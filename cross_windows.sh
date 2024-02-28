@@ -8,7 +8,7 @@ cd "$project_root"
 mkdir -p scratch/package/pectin/bin
 mkdir -p scratch/package/pectin/lib
 
-# -- Download & build Tcl --
+# -- Download Tcl & Tk --
 cd scratch
 
 if test \! -e tcl-${tcl_tag}.tar.gz; then
@@ -16,6 +16,18 @@ if test \! -e tcl-${tcl_tag}.tar.gz; then
         https://github.com/tcltk/tcl/archive/refs/tags/${tcl_tag}.tar.gz
 fi
 
+cp "$project_root"/hashes/tcl-${tcl_tag}.tar.gz.sha256 .
+sha256sum --check tcl-${tcl_tag}.tar.gz.sha256 || exit 1
+
+if test \! -e tk-${tcl_tag}.tar.gz; then
+    curl --location -o tk-${tcl_tag}.tar.gz\
+        https://github.com/tcltk/tk/archive/refs/tags/${tcl_tag}.tar.gz
+fi
+
+cp "$project_root"/hashes/tk-${tcl_tag}.tar.gz.sha256 .
+sha256sum --check tk-${tcl_tag}.tar.gz.sha256 || exit 1
+
+# -- Build Tcl --
 tar -xf tcl-${tcl_tag}.tar.gz
 cd tcl-${tcl_tag}/win
 mkdir -p build
@@ -29,13 +41,8 @@ make
 make install-libraries TCL_EXE=tclsh
 ln -sf tcl86.dll tcl8.6.dll
 
-# -- Download & build Tk --
+# -- Build Tk --
 cd "$project_root"/scratch
-
-if test \! -e tk-${tcl_tag}.tar.gz; then
-    curl --location -o tk-${tcl_tag}.tar.gz\
-        https://github.com/tcltk/tk/archive/refs/tags/${tcl_tag}.tar.gz
-fi
 
 tar -xf tk-${tcl_tag}.tar.gz
 cd tk-${tcl_tag}/win
