@@ -234,6 +234,7 @@ proc createAbout {} {
     grid rowconfigure .about 4 -weight 1
     configureBackground .about
     
+    update
     closeAbout
 }
 
