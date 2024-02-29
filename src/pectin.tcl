@@ -76,10 +76,10 @@ proc refreshPaths {} {
 }
 
 proc failureFilterUpdate {} {
-    if {[lsearch -exact [.filter state] selected] == -1} {
-        dict set ::config failureOnly 0
-    } else {
+    if {[.filter instate selected]} {
         dict set ::config failureOnly 1
+    } else {
+        dict set ::config failureOnly 0
     }
 
     refreshConfig
@@ -234,6 +234,7 @@ proc createAbout {} {
     grid rowconfigure .about 4 -weight 1
     configureBackground .about
     
+    update
     closeAbout
 }
 
@@ -289,6 +290,7 @@ ttk::treeview .maps -columns {state failure}\
 
 ttk::checkbutton .filter -text "Show failures only" -padding {8 8 8 8}\
     -command failureFilterUpdate
+.filter state !alternate
 
 grid .filter -sticky ew -columnspan 2
 grid .maps .scrolly -sticky nesw
