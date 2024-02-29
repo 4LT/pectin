@@ -34,9 +34,11 @@ proc populateMaps {treeView config mapList} {
             set item [$treeView insert {} end -text $label -tags {error parent}]
             $treeView item $item -values [list "Error: $errorType" $errorMsg]
         } else {
-            set report [dict get $map report]
-            set parent [$treeView insert {} end -text [dict get $map filename]]
-            set anyFail 0
+            variable expand [dict get $map expand]
+            variable report [dict get $map report]
+            variable parent [$treeView insert {} end\
+                -text [dict get $map filename] -open $expand]
+            variable anyFail 0
 
             dict for {key val} $report {
                 set condition [lindex $val 0]
@@ -70,9 +72,41 @@ proc refreshConfig {} {
 }
 
 proc refreshPaths {} {
-    set ::maps [lmap path $::paths { build_report $path }]
+    variable maps [lmap path $::paths { build_report $path }]
+    extendReportMetadata maps
     sortReports ::maps
     populateMaps .maps $::config $::maps
+}
+
+proc extendReportMetadata {mapsRef} {
+    upvar $mapsRef maps
+    variable map
+    
+    for {set idx 0} {$idx < [llength $maps]} {incr idx} {
+        set map [lindex $maps $idx]
+        dict set map expand 0
+        lset maps $idx $map
+    }
+}
+
+proc cacheMapExpand {treeview expand} {
+    variable items [$treeview selection]
+    variable count [llength $items]
+
+    if {$count == 1} {
+        variable filename [$treeview item [lindex $items 0] -text]
+        variable map
+
+        for {set idx 0} {$idx < [llength $::maps]} {incr idx} {
+            set map [lindex $::maps $idx]
+
+            if {[dict get $map filename] == $filename} {
+                dict set map expand $expand
+                lset ::maps $idx $map
+                break
+            }
+        }
+    }
 }
 
 proc failureFilterUpdate {} {
@@ -285,6 +319,8 @@ ttk::treeview .maps -columns {state failure}\
 .maps heading state -text State
 .maps heading failure -text "Failure details"
 .maps tag configure error -foreground red
+bind .maps <<TreeviewOpen>> {cacheMapExpand .maps 1}
+bind .maps <<TreeviewClose>> {cacheMapExpand .maps 0}
 
 .scrolly configure -command {.maps yview}
 
