@@ -17,6 +17,27 @@ fn main() {
     println!("cargo:rerun-if-changed=about.hbs");
     println!("cargo:rerun-if-env-changed=WARN_FATAL");
 
+    let tcl_license = include_str!("LICENSE-TCL.txt").replace("\"", r#"\""#);
+
+    let tcl_license_dict = format!(
+        r#"{{
+        name "Tcl/Tk License"
+        text "{tcl_license}"
+        usedBy {{
+            {{
+                crate "Tcl"
+                version "8.6.13"
+                href "https://tcl.tk"
+            }}
+            {{
+                crate "Tk"
+                version "8.6.13"
+                href "https://tc;.tk"
+            }}
+        }}
+    }}"#
+    );
+
     let out = Command::new("cargo")
         .arg("about")
         .arg("generate")
@@ -31,11 +52,13 @@ fn main() {
         != 0;
 
     let license_dict = if out.status.success() {
-        String::from_utf8_lossy(&out.stdout)
+        let mut dict = String::from_utf8_lossy(&out.stdout)
             .replace("&quot;", r#"\""#)
             .replace("&lt;", "<")
             .replace("&gt;", ">")
-            .replace("&#x27;", "\x27")
+            .replace("&#x27;", "\x27");
+        dict.push_str(&tcl_license_dict[..]);
+        dict
     } else {
         warn(warn_is_fatal, "\"cargo about\" failed (not installed?)");
         warn(false, "Skipping compilation of licenses");
