@@ -337,6 +337,7 @@ createAbout
 
 wm title . Pectin
 wm client . Pectin
+wm minsize . [scaleDim 500] [scaleDim 400]
 
 wm protocol . WM_DELETE_WINDOW {
     closePectin
