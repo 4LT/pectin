@@ -17,7 +17,7 @@ fn main() {
     println!("cargo:rerun-if-changed=about.hbs");
     println!("cargo:rerun-if-env-changed=WARN_FATAL");
 
-    let tcl_license = include_str!("LICENSE-TCL.txt").replace("\"", r#"\""#);
+    let tcl_license = include_str!("LICENSE-TCL.txt").replace('\"', r#"\""#);
 
     let tcl_license_dict = format!(
         r#"{{
