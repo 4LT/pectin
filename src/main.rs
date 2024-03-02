@@ -268,9 +268,11 @@ fn report(path_string: &str) -> TclResult<tcl::Obj> {
 
 fn main() -> Result<(), String> {
     let interp = tcl::Interpreter::new().map_err(|e| e.to_string())?;
-    let licenses = Obj::from(include_str!("licenses.tcldict"));
+    let licenses =
+        Obj::from(include_str!(concat!(env!("OUT_DIR"), "/licenses.tcldict")));
     interp.set("licenses", licenses);
-    let build_info = Obj::from(include_str!("build.tcldict"));
+    let build_info =
+        Obj::from(include_str!(concat!(env!("OUT_DIR"), "/build.tcldict")));
     interp.set("buildinfo", build_info);
 
     let _report_cmd = tclfn!(

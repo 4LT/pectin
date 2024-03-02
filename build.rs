@@ -1,6 +1,7 @@
 use git_testament::{git_testament, CommitKind};
 use std::env;
 use std::fs;
+use std::path::Path;
 use std::process::Command;
 
 fn warn(fatal: bool, mesg: impl std::fmt::Display) {
@@ -16,6 +17,8 @@ fn main() {
     git_testament!(TESTAMENT);
     println!("cargo:rerun-if-changed=about.hbs");
     println!("cargo:rerun-if-env-changed=WARN_FATAL");
+
+    let out_dir = env::var_os("OUT_DIR").unwrap();
 
     let tcl_license = include_str!("LICENSE-TCL.txt").replace('\"', r#"\""#);
 
@@ -65,7 +68,8 @@ fn main() {
         String::from("")
     };
 
-    fs::write("src/licenses.tcldict", license_dict).unwrap();
+    let license_path = Path::new(&out_dir).join("licenses.tcldict");
+    fs::write(license_path, license_dict).unwrap();
     let version = env!("CARGO_PKG_VERSION");
     let repo_name = env!("CARGO_PKG_REPOSITORY");
     let target = env::var("TARGET").unwrap();
@@ -92,8 +96,9 @@ fn main() {
         warn(warn_is_fatal, "Working directory is dirty");
     }
 
+    let build_dict_path = Path::new(&out_dir).join("build.tcldict");
     fs::write(
-        "src/build.tcldict",
+        build_dict_path,
         format!(
             r#"version "{version}"
             repo "{repo_name}"
