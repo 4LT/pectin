@@ -38,7 +38,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install-libraries TCL_EXE=tclsh
+make install TCL_EXE=tclsh
 ln -sf tcl86.dll tcl8.6.dll
 
 # -- Build Tk --
@@ -72,7 +72,9 @@ cp "${project_root}/scratch/tcl-${tcl_tag}/win/build/tcl86.dll" bin/
 cp "${project_root}/scratch/tcl-${tcl_tag}/win/build/zlib1.dll" bin/
 cp "${project_root}/scratch/tk-${tcl_tag}/win/build/tk86.dll" bin/
 rm -rf lib/tcl8.6
-cp -r "${project_root}/scratch/tcl-${tcl_tag}/win/build/lib/tcl8.6" lib/
+cp -r "${project_root}/scratch/tcl-${tcl_tag}/win/build/lib/tcl8.6" lib/tcl8.6
+rm -rf lib/tcl8
+cp -r "${project_root}/scratch/tcl-${tcl_tag}/win/build/lib/tcl8" lib/tcl8
 rm -rf lib/tk8.6
 cp -r "${project_root}/scratch/tk-${tcl_tag}/win/build/lib/tk8.6" lib/tk8.6
 cd "${project_root}/scratch/package"
