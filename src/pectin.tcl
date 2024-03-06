@@ -1,13 +1,72 @@
 package require Tk 8.6
+package require platform
 
 variable ::maps {}
 variable ::paths {}
 variable ::config {
     failureOnly 0
+    initialDir ""
 }
 
+proc getConfigPath {} {
+    variable dir
+
+    if {[string first win32- [platform::identify]] == 0} {
+        set dir [file join $::env(USERPROFILE) "AppData/Roaming"]
+    } else {
+        set dir [file join $::env(HOME) ".config"]
+    }
+
+    file mkdir $dir
+    return [file join $dir "pectin.conf"]
+}
+
+variable ::CONFIG_PATH [getConfigPath]
+variable ::CONFIG_VERSION v1
 variable ::MAP_TYPES {
     {{Quake Map} {.bsp .BSP}}
+}
+
+proc readConfig {} {
+    variable versionedConfig
+    variable configFile
+    variable retVals
+
+    if {[catch {open $::CONFIG_PATH r} configFile]} {
+        return {fail io}
+    }
+
+    if {[catch {read $configFile} versionedConfig]} {
+        close $configFile
+        return {fail io}
+    }
+
+    close $configFile
+
+    if {[catch {
+        set ::config [dict get $versionedConfig $::CONFIG_VERSION]
+    }]} {
+        return {fail version}
+    }
+
+    return success
+}
+
+proc writeConfig {} {
+    variable versionedConfig [dict create $::CONFIG_VERSION $::config]
+    variable configFile
+
+    if {[catch {open $::CONFIG_PATH w} configFile]} {
+        return fail
+    }
+
+    if {[catch {puts $configFile $versionedConfig}]} {
+        close $configFile
+        return fail
+    }
+    
+    close $configFile
+    return success
 }
 
 proc configureBackground {win} {
@@ -15,6 +74,7 @@ proc configureBackground {win} {
 }
 
 proc closePectin {} {
+    writeConfig
     destroy .
 }
 
@@ -120,19 +180,36 @@ proc failureFilterUpdate {} {
 }
 
 proc chooseFiles {} {
-    set paths [tk_getOpenFile -filetypes $::MAP_TYPES -multiple 1]
+    variable initialDir [dict get $::config initialDir]
+    variable paths
+
+    if {$initialDir == ""} {
+        set paths [tk_getOpenFile -filetypes $::MAP_TYPES -multiple 1]
+    } else {
+        set paths [tk_getOpenFile -filetypes $::MAP_TYPES -multiple 1\
+            -initialdir $initialDir]
+    }
     
     if {[llength $paths] > 0} {
         set ::paths $paths
+        dict set ::config initialDir [file dirname [lindex $paths 0]]
         refreshPaths
     }
 }
 
 proc chooseDir {} {
-    set dir [tk_chooseDirectory -mustexist 1]
+    variable initialDir [dict get $::config initialDir]
+    variable dir
+
+    if {$initialDir == ""} {
+        set dir [tk_chooseDirectory -mustexist 1]
+    } else {
+        set dir [tk_chooseDirectory -mustexist 1 -initialdir $initialDir]
+    }
 
     if {$dir != ""} {
         set ::paths [glob -nocomplain -types {f l} -join $dir {*.[Bb][Ss][Pp]}]
+        dict set ::config initialDir $dir
         refreshPaths
     }
 }
@@ -283,6 +360,8 @@ proc openAbout {} {
     wm minsize .about [scaleDim 500] [scaleDim 600]
 }
 
+readConfig
+
 option add *Menu.tearOff 0
 menu .m
 menu .m.file 
@@ -327,6 +406,10 @@ bind .maps <<TreeviewClose>> {cacheMapExpand .maps 0}
 ttk::checkbutton .filter -text "Show failures only" -padding {8 8 8 8}\
     -command failureFilterUpdate
 .filter state !alternate
+
+if {[dict get $::config failureOnly]} {
+    .filter state selected
+}
 
 grid .filter -sticky ew -columnspan 2
 grid .maps .scrolly -sticky nesw
