@@ -45,7 +45,7 @@ jobs:
       - name: Install Tcl Headers
         run: sudo apt-get install tcl-dev
       - name: Build Windows Exe
-        run: WARN_FATAL=1 ./cross_windows.sh
+        run: ./cross_windows.sh --ci
       - uses: actions/upload-artifact@v4
         with:
           name: >-

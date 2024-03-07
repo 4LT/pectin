@@ -1,5 +1,17 @@
 #!/bin/sh
 
+extra_cargo_flags=
+WARN_FATAL=0
+
+for arg in "$@"; do
+    case $arg in
+        "--ci")
+            extra_cargo_flags="--frozen"
+            WARN_FATAL=1
+            ;;
+    esac
+done
+
 script=`readlink -fn "$0"`
 project_root=`dirname "$script"`
 tcl_tag=core-8-6-13
@@ -59,6 +71,8 @@ make install TCL_EXE=tclsh
 
 # -- Build exe --
 cd "$project_root"
+
+export WARN_FATAL
 
 RUSTFLAGS="-L scratch/tcl-${tcl_tag}/win/build"\
     PKG_CONFIG_ALLOW_CROSS=1\
