@@ -1,5 +1,17 @@
 #!/bin/sh
 
+extra_cargo_flags=
+WARN_FATAL=0
+
+for arg in "$@"; do
+    case $arg in
+        "--ci")
+            extra_cargo_flags="--frozen"
+            WARN_FATAL=1
+            ;;
+    esac
+done
+
 script=`readlink -fn "$0"`
 project_root=`dirname "$script"`
 tcl_tag=core-8-6-13
@@ -38,7 +50,7 @@ if test \! -e Makefile; then
 fi
 
 make
-make install-libraries TCL_EXE=tclsh
+make install TCL_EXE=tclsh
 ln -sf tcl86.dll tcl8.6.dll
 
 # -- Build Tk --
@@ -60,10 +72,13 @@ make install TCL_EXE=tclsh
 # -- Build exe --
 cd "$project_root"
 
+export WARN_FATAL
+
 RUSTFLAGS="-L scratch/tcl-${tcl_tag}/win/build"\
     PKG_CONFIG_ALLOW_CROSS=1\
     BINDGEN_EXTRA_CLANG_ARGS='-D__int64="long long" -Dssize_t=int64_t'\
-    cargo build --target=x86_64-pc-windows-gnu --release || exit 1
+    cargo build --target=x86_64-pc-windows-gnu --release $extra_carg_flags\
+    || exit 1
 
 #  -- Build package --
 cd scratch/package/pectin
@@ -72,7 +87,9 @@ cp "${project_root}/scratch/tcl-${tcl_tag}/win/build/tcl86.dll" bin/
 cp "${project_root}/scratch/tcl-${tcl_tag}/win/build/zlib1.dll" bin/
 cp "${project_root}/scratch/tk-${tcl_tag}/win/build/tk86.dll" bin/
 rm -rf lib/tcl8.6
-cp -r "${project_root}/scratch/tcl-${tcl_tag}/win/build/lib/tcl8.6" lib/
+cp -r "${project_root}/scratch/tcl-${tcl_tag}/win/build/lib/tcl8.6" lib/tcl8.6
+rm -rf lib/tcl8
+cp -r "${project_root}/scratch/tcl-${tcl_tag}/win/build/lib/tcl8" lib/tcl8
 rm -rf lib/tk8.6
 cp -r "${project_root}/scratch/tk-${tcl_tag}/win/build/lib/tk8.6" lib/tk8.6
 cd "${project_root}/scratch/package"
