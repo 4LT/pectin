@@ -77,7 +77,8 @@ export WARN_FATAL
 RUSTFLAGS="-L scratch/tcl-${tcl_tag}/win/build"\
     PKG_CONFIG_ALLOW_CROSS=1\
     BINDGEN_EXTRA_CLANG_ARGS='-D__int64="long long" -Dssize_t=int64_t'\
-    cargo build --target=x86_64-pc-windows-gnu --release || exit 1
+    cargo build --target=x86_64-pc-windows-gnu --release $extra_carg_flags\
+    || exit 1
 
 #  -- Build package --
 cd scratch/package/pectin
