@@ -109,6 +109,7 @@ fn report_payload(
     let mut exit_maps: Vec<String> = Vec::new();
 
     let qmap = parser.parse_entities()?;
+    let mut intermission_ct = 0i32;
 
     for entity in qmap.entities {
         let edict = entity.edict;
@@ -194,6 +195,8 @@ fn report_payload(
                         exit_maps.push("<No Map>".to_string());
                     }
                 }
+            } else if classname == &CString::new("info_intermission").unwrap() {
+                intermission_ct += 1;
             }
         }
 
@@ -217,6 +220,20 @@ fn report_payload(
             }
         }
     }
+
+    let intermission_ct_str = format!("{intermission_ct}");
+
+    report_payload.insert(
+        "Intermission Count".to_string(),
+        if intermission_ct == 0 {
+            ReportField::Fail(
+                intermission_ct_str,
+                "No intermission cameras".to_string(),
+            )
+        } else {
+            ReportField::Pass(intermission_ct_str)
+        },
+    );
 
     let filename = path.as_ref().file_name();
     let filename = filename.and_then(|f| f.to_str());

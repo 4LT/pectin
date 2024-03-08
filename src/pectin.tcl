@@ -6,6 +6,7 @@ variable ::paths {}
 variable ::config {
     failureOnly 0
     initialDir ""
+    hideLineItems {}
 }
 
 proc getConfigPath {} {
