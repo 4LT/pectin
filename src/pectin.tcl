@@ -361,11 +361,65 @@ proc openAbout {} {
     wm minsize .about [scaleDim 500] [scaleDim 600]
 }
 
+proc lineItemClick {checkBtn regex} {
+    puts "Check button $checkBtn, Regex $regex"
+}
+
+proc newLineItem {winName text regex} {
+    ttk::checkbutton $winName -text $text\
+        -command [subst {lineItemClick "$winName" "$regex"}]
+    $winName state !alternate
+    return $winName
+}
+
+proc createConfigLineItems {} {
+    toplevel .config -padx 10
+
+    variable checkNum 0
+    variable checks {
+        {"Changelevel to/from start" "Changelevel"}
+        {"Lighting" "Lighting"}
+        {"Intermission cameras" "Intermission Count"}
+        {"Map title set" "Title"}
+        {"Music track" "Track No\\."}
+        {"BSP version" "Version"}
+        {"VIS present" "Vis"}
+        {"Empty targets" ".* Target"}
+    }
+
+    foreach check $checks {
+        variable text [lindex $check 0]
+        variable regex [lindex $check 1]
+        variable winName .config.check${checkNum}
+        grid $winName [newLineItem $winName $text $regex] -sticky w
+        incr checkNum
+    }
+
+    grid [ttk::button .config.ok -text "Ok"\
+        -command closeConfigLineItems] -sticky e -pady 10
+
+    configureBackground .config
+    update
+    closeConfigLineItems
+}
+
+proc closeConfigLineItems {} {
+    wm forget .config
+}
+
+proc openConfigLineItems {} {
+    wm manage .config
+    wm title .config "Pectin - Configuration"
+    wm protocol .config WM_DELETE_WINDOW closeConfigLineItems
+    wm resizable .config 0 0
+}
+
 readConfig
 
 option add *Menu.tearOff 0
 menu .m
 menu .m.file 
+menu .m.options
 menu .m.help
 
 .m.file add command -label "Open Map(s)..." -underline 0 -accelerator "Ctrl+O"\
@@ -376,10 +430,13 @@ menu .m.help
 .m.file add command -label "Exit" -underline 1 -accelerator "Alt+F4"\
     -command closePectin
 
+.m.options add command -label Configuration -command openConfigLineItems
+
 .m.help add command -label About -underline 0 -accelerator "F1"\
     -command openAbout
 
 .m add cascade -label File -underline 0 -menu .m.file
+.m add cascade -label Options -underline 0 -menu .m.options
 .m add cascade -label Help -underline 0 -menu .m.help
 . configure -menu .m
 
@@ -404,20 +461,24 @@ bind .maps <<TreeviewClose>> {cacheMapExpand .maps 0}
 
 .scrolly configure -command {.maps yview}
 
-ttk::checkbutton .filter -text "Show failures only" -padding {8 8 8 8}\
-    -command failureFilterUpdate
+ttk::checkbutton .filter -text "Show failures only" -command failureFilterUpdate
 .filter state !alternate
 
 if {[dict get $::config failureOnly]} {
     .filter state selected
 }
 
-grid .filter -sticky ew -columnspan 2
+grid .filter -sticky w -columnspan 2 -padx 8 -pady 8
 grid .maps .scrolly -sticky nesw
 grid columnconfigure . 0 -weight 1
 grid rowconfigure . 1 -weight 1
 
+configureBackground .
+
+wm minsize . [scaleDim 500] [scaleDim 500]
+
 createAbout
+createConfigLineItems
 
 wm title . Pectin
 wm client . Pectin
