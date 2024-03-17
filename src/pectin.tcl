@@ -84,6 +84,14 @@ proc populateMaps {treeView config mapList} {
         $treeView delete $child
     }
 
+    variable hideRegexes {}
+
+    dict for {regex hide} [dict get $::config hideLineItems] {
+        if {$hide} {
+            lappend hideRegexes $regex
+        }
+    }
+
     foreach map $mapList {
         set failureOnly [dict get $config failureOnly]
 
@@ -102,9 +110,18 @@ proc populateMaps {treeView config mapList} {
             variable anyFail 0
 
             dict for {key val} $report {
-                set condition [lindex $val 0]
+                variable condition [lindex $val 0]
+                # TODO: Why isn't hide already unset? Tcl Bug?
+                unset hide
+                variable hide 0
 
-                if {$failureOnly && $condition != "fail"} {
+                foreach regex $hideRegexes {
+                    if {[regexp -- $regex $key]} {
+                        set hide 1
+                    }
+                }
+
+                if {$hide || ($failureOnly && $condition != "fail")} {
                     continue
                 }
 
@@ -364,17 +381,14 @@ proc openAbout {} {
 proc lineItemClick {checkBtn regex} {
     variable hide [expr ![$checkBtn instate selected]]
     dict set ::config hideLineItems $regex $hide
+    refreshConfig
 }
 
 proc newLineItem {winName text regex} {
     ttk::checkbutton $winName -text $text\
         -command [subst {lineItemClick "$winName" "$regex"}]
     $winName state !alternate
-    variable hide
-
-    if {[catch {dict get $::config hideLineItems $regex} hide]} {
-        set hide 0
-    }
+    variable hide [lineItemHidden $regex]
     
     if {$hide} {
         $winName state !selected
@@ -383,6 +397,16 @@ proc newLineItem {winName text regex} {
     }
 
     return $winName
+}
+
+proc lineItemHidden {itemRegex} {
+    variable hide
+
+    if {[catch {dict get $::config hideLineItems $itemRegex} hide]} {
+        set hide 0
+    }
+
+    return $hide
 }
 
 proc createConfigLineItems {} {
@@ -445,7 +469,7 @@ menu .m.help
 .m.file add command -label "Exit" -underline 1 -accelerator "Alt+F4"\
     -command closePectin
 
-.m.options add command -label Configuration -command openConfigLineItems
+.m.options add command -label Configure -command openConfigLineItems
 
 .m.help add command -label About -underline 0 -accelerator "F1"\
     -command openAbout
