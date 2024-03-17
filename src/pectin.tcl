@@ -13,7 +13,7 @@ proc getConfigPath {} {
     variable dir
 
     if {[string first win32- [platform::identify]] == 0} {
-        set dir [file join $::env(USERPROFILE) "AppData/Roaming"]
+        set dir [file join $::env(USERPROFILE) "AppData/Local"]
     } else {
         set dir [file join $::env(HOME) ".config"]
     }
