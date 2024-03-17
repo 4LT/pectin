@@ -111,8 +111,10 @@ proc populateMaps {treeView config mapList} {
 
             dict for {key val} $report {
                 variable condition [lindex $val 0]
+
                 # TODO: Why isn't hide already unset? Tcl Bug?
-                unset hide
+                catch {unset hide}
+
                 variable hide 0
 
                 foreach regex $hideRegexes {
@@ -386,7 +388,7 @@ proc lineItemClick {checkBtn regex} {
 
 proc newLineItem {winName text regex} {
     ttk::checkbutton $winName -text $text\
-        -command [subst {lineItemClick "$winName" "$regex"}]
+        -command [list lineItemClick $winName $regex]
     $winName state !alternate
     variable hide [lineItemHidden $regex]
     
