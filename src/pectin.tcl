@@ -362,18 +362,33 @@ proc openAbout {} {
 }
 
 proc lineItemClick {checkBtn regex} {
-    puts "Check button $checkBtn, Regex $regex"
+    variable hide [expr ![$checkBtn instate selected]]
+    dict set ::config hideLineItems $regex $hide
 }
 
 proc newLineItem {winName text regex} {
     ttk::checkbutton $winName -text $text\
         -command [subst {lineItemClick "$winName" "$regex"}]
     $winName state !alternate
+    variable hide
+
+    if {[catch {dict get $::config hideLineItems $regex} hide]} {
+        set hide 0
+    }
+    
+    if {$hide} {
+        $winName state !selected
+    } else {
+        $winName state selected
+    }
+
     return $winName
 }
 
 proc createConfigLineItems {} {
     toplevel .config -padx 10
+
+    grid [ttk::frame .config.toppad -height 10] -sticky nesw
 
     variable checkNum 0
     variable checks {
