@@ -304,7 +304,7 @@ fn main() -> Result<(), String> {
     let mut done = false;
 
     while !done {
-        std::thread::sleep(Duration::from_millis(1000 / 60));
+        std::thread::sleep(Duration::from_millis(1000 / 120));
         interp.update().map_err(|e| e.to_string())?;
         let root_cmd =
             interp.eval("info commands .").map_err(|e| e.to_string())?;
